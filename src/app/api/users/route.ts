@@ -31,6 +31,7 @@ export const POST = async (req: Request) => {
       const fileData = await fs.readFile(filePath, "utf-8");
       users = JSON.parse(fileData);
     } catch (err) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       if ((err as any).code !== "ENOENT") throw err;
       users = [];
     }

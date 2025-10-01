@@ -27,7 +27,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <UserContextProvider>{children}</UserContextProvider>
+        <UserContextProvider>
+          {children}
+          <Toaster richColors position="top-center" />
+        </UserContextProvider>
       </body>
     </html>
   );

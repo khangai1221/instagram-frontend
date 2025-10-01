@@ -2,6 +2,7 @@
 import { createContext, useState } from "react";
 
 type User = {
+  avatar: unknown;
   _id: string;
   username: string;
   fullname: string;
