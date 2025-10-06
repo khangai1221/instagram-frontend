@@ -25,11 +25,11 @@ type User = {
 };
 
 type Post = {
-  id: number;
-  user: string;
-  avatar: string;
-  image: string;
-  caption: string;
+  _id: string;
+  user?: string;
+  avatar?: string;
+  imageUrl: string;
+  description: string;
   liked: boolean;
   likes: number;
 };
@@ -47,6 +47,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
+  // Check JWT and set user
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
@@ -77,6 +78,7 @@ export default function Home() {
     }
   }, [router, setUser]);
 
+  // Fetch users for stories
   useEffect(() => {
     async function fetchUsers() {
       const token = localStorage.getItem("token");
@@ -94,20 +96,6 @@ export default function Home() {
         }
 
         setUsers(data.body);
-
-        const postsFromUsers: Post[] = data.body.map((u, i) => ({
-          id: i + 1,
-          user: u.username,
-          avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(
-            u.username
-          )}&background=random&size=64`,
-          image: `https://source.unsplash.com/random/800x800?nature,${i + 10}`,
-          caption: `A nice shot — by ${u.username}`,
-          liked: false,
-          likes: Math.floor(Math.random() * 150) + 10,
-        }));
-
-        setPosts(postsFromUsers);
       } catch (err) {
         console.error("Failed to fetch users:", err);
       }
@@ -116,12 +104,47 @@ export default function Home() {
     fetchUsers();
   }, []);
 
+  // Fetch real posts
+  useEffect(() => {
+    async function fetchPosts() {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+
+      try {
+        const res = await fetch("http://localhost:5500/posts", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data: Post[] = await res.json();
+
+        if (!res.ok) {
+          console.error("Error fetching posts");
+          return;
+        }
+
+        setPosts(
+          (data || []).map((p) => ({
+            ...p,
+            avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(
+              p.user ?? "Unknown"
+            )}&background=random&size=64`,
+            liked: false,
+            likes: Math.floor(Math.random() * 100) + 1,
+          }))
+        );
+      } catch (err) {
+        console.error("Failed to fetch posts:", err);
+      }
+    }
+
+    fetchPosts();
+  }, []);
+
   if (loading || !user) return <div>Loading...</div>;
 
-  const toggleLike = (postId: number) => {
+  const toggleLike = (_id: string) => {
     setPosts((prev) =>
       prev.map((p) =>
-        p.id === postId
+        p._id === _id
           ? {
               ...p,
               liked: !p.liked,
@@ -212,69 +235,78 @@ export default function Home() {
       <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-3 gap-6 py-6">
         {/* Posts */}
         <section className="lg:col-span-2">
-          {posts.map((post) => (
-            <Card key={post.id} className="mb-6 overflow-hidden">
-              <CardContent className="p-0">
-                <div className="flex items-center gap-3 px-4 py-3">
-                  <Avatar>
-                    <AvatarImage src={post.avatar} />
-                    <AvatarFallback>
-                      {post.user[0].toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1 flex justify-between items-center">
-                    <div className="text-sm font-semibold">{post.user}</div>
-                    <div className="text-xs text-gray-500">2h</div>
+          {posts.length > 0 ? (
+            posts.map((post) => (
+              <Card key={post._id} className="mb-6 overflow-hidden">
+                <CardContent className="p-0">
+                  <div className="flex items-center gap-3 px-4 py-3">
+                    <Avatar>
+                      <AvatarImage src={post.avatar} />
+                      <AvatarFallback>
+                        {(post.user?.[0] ?? "?").toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 flex justify-between items-center">
+                      <div className="text-sm font-semibold">
+                        {post.user ?? "Unknown"}
+                      </div>
+                      <div className="text-xs text-gray-500">2h</div>
+                    </div>
                   </div>
-                </div>
-                <Image
-                  src={post.image}
-                  alt={`post-${post.id}`}
-                  width={800}
-                  height={800}
-                  className="w-full max-h-[720px] object-cover"
-                />
-                <div className="px-4 py-3">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-3">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => toggleLike(post.id)}
-                      >
-                        <Heart
-                          className={`w-6 h-6 ${
-                            post.liked ? "text-red-500 fill-red-500" : ""
-                          }`}
-                        />
-                      </Button>
+                  <Image
+                    src={post.imageUrl}
+                    alt={`post-${post._id}`}
+                    width={800}
+                    height={800}
+                    className="w-full max-h-[720px] object-cover"
+                  />
+                  <div className="px-4 py-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-3">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => toggleLike(post._id)}
+                        >
+                          <Heart
+                            className={`w-6 h-6 ${
+                              post.liked ? "text-red-500 fill-red-500" : ""
+                            }`}
+                          />
+                        </Button>
+                        <Button variant="ghost" size="icon">
+                          <MessageCircle className="w-6 h-6" />
+                        </Button>
+                        <Button variant="ghost" size="icon">
+                          <Send className="w-6 h-6" />
+                        </Button>
+                      </div>
                       <Button variant="ghost" size="icon">
-                        <MessageCircle className="w-6 h-6" />
-                      </Button>
-                      <Button variant="ghost" size="icon">
-                        <Send className="w-6 h-6" />
+                        <Bookmark className="w-5 h-5" />
                       </Button>
                     </div>
-                    <Button variant="ghost" size="icon">
-                      <Bookmark className="w-5 h-5" />
-                    </Button>
+                    <div className="text-sm font-semibold mb-1">
+                      {post.likes} likes
+                    </div>
+                    <div className="text-sm">
+                      <span className="font-semibold mr-1">
+                        {post.user ?? "Unknown"}
+                      </span>
+                      <span className="text-gray-700">{post.description}</span>
+                    </div>
+                    <div className="mt-3">
+                      <Input placeholder="Add a comment..." />
+                    </div>
                   </div>
-                  <div className="text-sm font-semibold mb-1">
-                    {post.likes} likes
-                  </div>
-                  <div className="text-sm">
-                    <span className="font-semibold mr-1">{post.user}</span>
-                    <span className="text-gray-700">{post.caption}</span>
-                  </div>
-                  <div className="mt-3">
-                    <Input placeholder="Add a comment..." />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                </CardContent>
+              </Card>
+            ))
+          ) : (
+            <div>No posts yet</div>
+          )}
         </section>
 
+        {/* Sidebar */}
         <aside className="hidden lg:block space-y-4">
           <Card>
             <CardContent className="p-4 flex items-center gap-3">
