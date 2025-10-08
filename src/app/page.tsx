@@ -68,7 +68,6 @@ export default function Home() {
         email: null,
         phone: null,
       });
-      return router.push("/signin");
     } catch (err) {
       console.error("JWT invalid:", err);
       localStorage.removeItem("token");
