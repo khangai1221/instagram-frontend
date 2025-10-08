@@ -4,12 +4,13 @@ import React, { useState, useContext, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { jwtDecode } from "jwt-decode";
 import { UserContext } from "./providers/UserProvider";
-
 import Header from "./components/Header";
 import Stories from "./components/Stories";
 import CreatePost from "./components/CreatePost";
 import PostCard from "./components/PostCard";
 import Sidebar from "./components/SideBar";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 type User = {
   _id: string;
@@ -68,64 +69,49 @@ export default function Home() {
         email: null,
         phone: null,
       });
+
+      setLoading(false);
     } catch (err) {
       console.error("JWT invalid:", err);
       localStorage.removeItem("token");
       router.push("/signin");
-    } finally {
-      setLoading(false);
     }
   }, [router, setUser]);
 
   useEffect(() => {
-    if (!user) return;
-
     async function fetchUsers() {
       const token = localStorage.getItem("token");
       if (!token) return;
 
       try {
-        const res = await fetch("http://localhost:5500/users", {
+        const res = await fetch(`${API_URL}/users`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        const data: { body: User[]; message: string } = await res.json();
-
-        if (res.ok) {
-          setUsers(data.body);
-        } else {
-          console.error("Error fetching users:", data.message);
-        }
+        const data = await res.json();
+        setUsers(data.body || []);
       } catch (err) {
         console.error("Failed to fetch users:", err);
       }
     }
 
     fetchUsers();
-  }, [user]);
+  }, []);
 
   useEffect(() => {
-    if (!user?._id) return;
-
     async function fetchPosts() {
-      try {
-        const token = localStorage.getItem("token");
-        if (!token) return;
+      const token = localStorage.getItem("token");
+      if (!token || !user) return;
 
-        const res = await fetch("http://localhost:5500/posts", {
+      try {
+        const res = await fetch(`${API_URL}/posts`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-
-        const data = await res.json();
-        if (!res.ok) {
-          console.error("Error fetching posts");
-          return;
-        }
+        const data: PostType[] = await res.json();
 
         setPosts(
-          (data || []).map((p: PostType) => ({
+          data.map((p) => ({
             ...p,
             liked: p.likedUsers?.includes(user._id) ?? false,
-            likes: Number(p.likes) || 0,
           }))
         );
       } catch (err) {
@@ -134,51 +120,42 @@ export default function Home() {
     }
 
     fetchPosts();
-  }, [user?._id]);
+  }, [user]);
 
-  if (loading) return <div>Loading...</div>;
-  if (!user) return <div>Redirecting...</div>;
+  if (loading || !user) return <div>Loading...</div>;
 
   const toggleLike = async (postId: string) => {
-    if (!user) return;
-
     const post = posts.find((p) => p._id === postId);
-    if (!post) return;
+    if (!post || !user) return;
 
     try {
-      const res = await fetch(`http://localhost:5500/posts/${postId}/like`, {
+      const res = await fetch(`${API_URL}/posts/${postId}/like`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId: user._id }),
       });
 
       const data = await res.json();
-      if (!res.ok) {
-        console.error("Error liking post:", data.message);
-        return;
-      }
+      if (!res.ok) return console.error("Like failed:", data.message);
 
       setPosts((prev) =>
         prev.map((p) =>
-          p._id === postId
-            ? { ...p, liked: !p.liked, likes: data.likes ?? p.likes }
-            : p
+          p._id === postId ? { ...p, liked: !p.liked, likes: data.likes } : p
         )
       );
     } catch (err) {
-      console.error("Failed to like post:", err);
+      console.error("Error liking post:", err);
     }
   };
 
   const createPost = async () => {
     if (!newPostDescription || !newPostImage || !user) return;
-
     setPosting(true);
+
     const token = localStorage.getItem("token");
-    if (!token) return;
 
     try {
-      const res = await fetch("http://localhost:5500/posts", {
+      const res = await fetch(`${API_URL}/posts`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -192,11 +169,7 @@ export default function Home() {
       });
 
       const data = await res.json();
-      if (!res.ok) {
-        console.error("Failed to create post:", data.message);
-        setPosting(false);
-        return;
-      }
+      if (!res.ok) return console.error("Failed to create post:", data.message);
 
       setPosts((prev) => [
         {
@@ -222,6 +195,57 @@ export default function Home() {
       setPosting(false);
     }
   };
+  const deletePost = async (postId: string) => {
+    if (!user) return;
+    const token = localStorage.getItem("token");
+    if (!token) return;
+
+    try {
+      const res = await fetch(`${API_URL}/posts/${postId}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ userId: user._id }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) return console.error("Failed to delete post:", data.message);
+
+      setPosts((prev) => prev.filter((p) => p._id !== postId));
+    } catch (err) {
+      console.error("Error deleting post:", err);
+    }
+  };
+
+  const editPost = async (postId: string, newDescription: string) => {
+    if (!user) return;
+    const token = localStorage.getItem("token");
+    if (!token) return;
+
+    try {
+      const res = await fetch(`${API_URL}/posts/${postId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ userId: user._id, description: newDescription }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) return console.error("Failed to edit post:", data.message);
+
+      setPosts((prev) =>
+        prev.map((p) =>
+          p._id === postId ? { ...p, description: newDescription } : p
+        )
+      );
+    } catch (err) {
+      console.error("Error editing post:", err);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900">
@@ -238,9 +262,15 @@ export default function Home() {
             createPost={createPost}
             posting={posting}
           />
-
           {posts.map((post) => (
-            <PostCard key={post._id} post={post} toggleLike={toggleLike} />
+            <PostCard
+              key={post._id}
+              post={post}
+              toggleLike={toggleLike}
+              currentUserId={user._id}
+              deletePost={deletePost}
+              editPost={editPost}
+            />
           ))}
         </section>
 

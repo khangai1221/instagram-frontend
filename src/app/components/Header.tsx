@@ -25,7 +25,7 @@ export default function Header() {
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-14">
         <h1
           className="text-5xl font-[GrandHotel]"
-          style={{ fontFamily: "'Grand Hotel', cursive" }}
+          style={{ fontFamily: "'Instagram Sans', bold" }}
         >
           Instagram
         </h1>
