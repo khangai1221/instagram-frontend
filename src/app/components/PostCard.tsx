@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useContext } from "react";
 import {
   Heart,
   MessageCircle,
@@ -23,6 +23,15 @@ import {
   DropdownMenuLabel,
   DropdownMenuGroup,
 } from "@/components/ui/dropdown-menu";
+import { format } from "timeago.js";
+import { UserContext } from "../providers/UserProvider";
+
+type Comment = {
+  userId?: string;
+  user: string;
+  text: string;
+  createdAt?: string;
+};
 
 type Post = {
   _id: string;
@@ -31,6 +40,9 @@ type Post = {
   description: string;
   liked: boolean;
   likes: number;
+  createdAt: string;
+  updatedAt?: string;
+  comments?: Comment[];
 };
 
 type PostCardProps = {
@@ -48,8 +60,11 @@ export default function PostCard({
   editPost,
   deletePost,
 }: PostCardProps) {
+  const { user } = useContext(UserContext); // get current user
   const [isEditing, setIsEditing] = useState(false);
   const [editedDescription, setEditedDescription] = useState(post.description);
+  const [comments, setComments] = useState<Comment[]>(post.comments || []);
+  const [newComment, setNewComment] = useState("");
 
   const username = post.user?.username ?? "Unknown";
   const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(
@@ -65,6 +80,35 @@ export default function PostCard({
     setIsEditing(false);
   };
 
+  const handleAddComment = async () => {
+    if (!newComment.trim() || !user) return;
+
+    try {
+      const res = await fetch(
+        `http://localhost:5500/posts/${post._id}/comments`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            text: newComment,
+            userId: user._id,
+            username: user.username,
+          }),
+        }
+      );
+
+      if (res.ok) {
+        const updatedPost = await res.json();
+        if (updatedPost.comments) setComments(updatedPost.comments);
+        setNewComment("");
+      } else {
+        console.error("Failed to save comment on server");
+      }
+    } catch (err) {
+      console.error("Error adding comment:", err);
+    }
+  };
+
   return (
     <Card key={post._id} className="mb-6 overflow-hidden">
       <CardContent className="p-0">
@@ -76,10 +120,11 @@ export default function PostCard({
           </Avatar>
           <div className="flex-1 flex justify-between items-center">
             <div className="text-sm font-semibold">{username}</div>
-            <div className="text-xs text-gray-500">2h</div>
+            <div className="text-xs text-gray-500">
+              {format(post.createdAt)}
+            </div>
           </div>
 
-          {/* Dropdown Menu */}
           {isOwner && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -172,6 +217,46 @@ export default function PostCard({
             ) : (
               <span className="text-gray-700">{post.description}</span>
             )}
+          </div>
+
+          {/* Comments Section */}
+          <div className="px-0 pt-2 mt-2">
+            <div className="space-y-1 mb-2">
+              {comments.length > 0 ? (
+                comments.map((comment, index) => (
+                  <div key={index} className="text-sm">
+                    <span className="font-semibold mr-1">{comment.user}</span>
+                    <span>{comment.text}</span>
+                    {comment.createdAt && (
+                      <span className="text-gray-400 text-xs ml-2">
+                        {format(comment.createdAt)}
+                      </span>
+                    )}
+                  </div>
+                ))
+              ) : (
+                <div className="text-sm text-gray-500">No comments yet</div>
+              )}
+            </div>
+
+            {/* Add Comment Input */}
+            <div className="flex items-center gap-2 border-t pt-2">
+              <Input
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                placeholder="Add a comment..."
+                className="text-sm flex-1 border-none focus-visible:ring-0"
+              />
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleAddComment}
+                disabled={!newComment.trim()}
+                className="text-blue-500 hover:text-blue-600"
+              >
+                Post
+              </Button>
+            </div>
           </div>
         </div>
       </CardContent>

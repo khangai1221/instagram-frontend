@@ -52,6 +52,8 @@ const SignInPage = () => {
       setUser(data.body);
 
       toast.success(data.message || "Signed in successfully");
+      setPassword("");
+      setCredential("");
       router.push("/"); // Redirect to home
     } catch (err) {
       console.error("Signin error:", err);

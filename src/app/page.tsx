@@ -30,6 +30,8 @@ type PostType = {
   liked: boolean;
   likes: number;
   likedUsers?: string[];
+  createdAt: string;
+  updatedAt?: string;
 };
 
 type JWTPayload = {
@@ -183,6 +185,8 @@ export default function Home() {
           description: newPostDescription,
           liked: false,
           likes: 0,
+          createdAt: data.body.createdAt,
+          updatedAt: data.body.updatedAt,
         },
         ...prev,
       ]);

@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
-
+//AIzaSyB_knwuMoCPeL2gvPJCj7oekSry8mo15jw
 type Post = {
   _id: string;
   description: string;
@@ -158,6 +158,7 @@ export default function PostsPage() {
                     No image
                   </div>
                 )}
+                <p></p>
                 <div className="font-semibold">{post.description}</div>
                 <div className="flex gap-2 mt-2">
                   <Button size="sm" onClick={() => handleUpdatePost(post._id)}>
