@@ -15,9 +15,9 @@ export default function Header() {
   )}&background=random&size=64`;
 
   const handleLogout = () => {
-    localStorage.removeItem("token"); // clear token
-    setUser(null); // fully clear user context
-    router.push("/signin"); // redirect to sign-in
+    localStorage.removeItem("token");
+    setUser(null);
+    router.push("/signin");
   };
 
   return (

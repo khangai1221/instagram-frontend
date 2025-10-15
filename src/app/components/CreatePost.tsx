@@ -1,12 +1,16 @@
 "use client";
+
+import { useState } from "react";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import Image from "next/image";
 
-type Props = {
+type CreatePostProps = {
   description: string;
-  setDescription: (val: string) => void;
+  setDescription: (desc: string) => void;
   imageUrl: string;
-  setImageUrl: (val: string) => void;
+  setImageUrl: (url: string) => void;
   createPost: () => void;
   posting: boolean;
 };
@@ -18,27 +22,41 @@ export default function CreatePost({
   setImageUrl,
   createPost,
   posting,
-}: Props) {
+}: CreatePostProps) {
   return (
-    <div className="mb-6">
-      <div className="flex flex-col gap-3">
+    <Card className="p-4 mb-6">
+      <CardContent className="flex flex-col gap-3">
         <Input
           placeholder="What's on your mind?"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
         />
         <Input
-          placeholder="Image URL"
+          placeholder="Enter image URL"
           value={imageUrl}
           onChange={(e) => setImageUrl(e.target.value)}
         />
+
+        {/* Show image if URL is valid */}
+        {imageUrl && (
+          <div className="w-full h-64 bg-gray-200 flex items-center justify-center rounded-md overflow-hidden">
+            <Image
+              src={imageUrl}
+              alt="Post image"
+              width={800}
+              height={400}
+              className="object-cover w-full h-full"
+            />
+          </div>
+        )}
+
         <Button
           onClick={createPost}
-          disabled={posting || !description || !imageUrl}
+          disabled={posting || !imageUrl || !description}
         >
-          {posting ? "Posting..." : "Post"}
+          {posting ? "Posting..." : "Create Post"}
         </Button>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }

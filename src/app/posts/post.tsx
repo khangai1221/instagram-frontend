@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
-//AIzaSyB_knwuMoCPeL2gvPJCj7oekSry8mo15jw
+
 type Post = {
   _id: string;
   description: string;

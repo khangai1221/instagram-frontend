@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useContext } from "react";
+import { useState } from "react";
 import {
   Heart,
   MessageCircle,
@@ -24,10 +24,8 @@ import {
   DropdownMenuGroup,
 } from "@/components/ui/dropdown-menu";
 import { format } from "timeago.js";
-import { UserContext } from "../providers/UserProvider";
 
 type Comment = {
-  userId?: string;
   user: string;
   text: string;
   createdAt?: string;
@@ -60,7 +58,6 @@ export default function PostCard({
   editPost,
   deletePost,
 }: PostCardProps) {
-  const { user } = useContext(UserContext); // get current user
   const [isEditing, setIsEditing] = useState(false);
   const [editedDescription, setEditedDescription] = useState(post.description);
   const [comments, setComments] = useState<Comment[]>(post.comments || []);
@@ -79,9 +76,8 @@ export default function PostCard({
     }
     setIsEditing(false);
   };
-
   const handleAddComment = async () => {
-    if (!newComment.trim() || !user) return;
+    if (!newComment.trim()) return;
 
     try {
       const res = await fetch(
@@ -91,15 +87,15 @@ export default function PostCard({
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             text: newComment,
-            userId: user._id,
-            username: user.username,
+            userId: currentUserId,
+            username: username, // current user's username
           }),
         }
       );
 
       if (res.ok) {
         const updatedPost = await res.json();
-        if (updatedPost.comments) setComments(updatedPost.comments);
+        setComments(updatedPost.comments);
         setNewComment("");
       } else {
         console.error("Failed to save comment on server");
@@ -220,12 +216,13 @@ export default function PostCard({
           </div>
 
           {/* Comments Section */}
-          <div className="px-0 pt-2 mt-2">
+          {/* Comments Section */}
+          <div className="px-4 pt-2 mt-2 border-t">
             <div className="space-y-1 mb-2">
               {comments.length > 0 ? (
                 comments.map((comment, index) => (
                   <div key={index} className="text-sm">
-                    <span className="font-semibold mr-1">{comment.user}</span>
+                    <span className="font-semibold mr-1">{comment.user}:</span>
                     <span>{comment.text}</span>
                     {comment.createdAt && (
                       <span className="text-gray-400 text-xs ml-2">
@@ -240,12 +237,12 @@ export default function PostCard({
             </div>
 
             {/* Add Comment Input */}
-            <div className="flex items-center gap-2 border-t pt-2">
+            <div className="flex items-center gap-2">
               <Input
                 value={newComment}
                 onChange={(e) => setNewComment(e.target.value)}
                 placeholder="Add a comment..."
-                className="text-sm flex-1 border-none focus-visible:ring-0"
+                className="flex-1 text-sm"
               />
               <Button
                 variant="ghost"

@@ -7,6 +7,7 @@ const nextConfig: NextConfig = {
       "static.vecteezy.com",
       "chatgpt.com",
       "images.unsplash.com",
+      "localhost:3001/_next/",
     ],
   },
 };
