@@ -22,11 +22,14 @@ const SignUpPage = () => {
       return;
     }
 
-    const response = await fetch("http://localhost:5500/signup", {
-      headers: { "Content-Type": "application/json" },
-      method: "POST",
-      body: JSON.stringify({ credential, password, fullname, username }),
-    });
+    const response = await fetch(
+      "https://instagram-backend1.vercel.app/signup",
+      {
+        headers: { "Content-Type": "application/json" },
+        method: "POST",
+        body: JSON.stringify({ credential, password, fullname, username }),
+      }
+    );
 
     if (!response.ok) {
       const errorData = await response.json();

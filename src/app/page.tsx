@@ -11,7 +11,7 @@ import { UserContext } from "./providers/UserProvider";
 import { toast, Toaster } from "sonner";
 import { jwtDecode } from "jwt-decode";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5500";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://instagram-backend1.vercel.app/";
 
 export default function Home() {
   const router = useRouter();
