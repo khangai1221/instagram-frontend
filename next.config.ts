@@ -1,6 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: "export", // enable static export
   images: {
     domains: [
       "source.unsplash.com",
@@ -14,4 +13,4 @@ const nextConfig = {
   },
 };
 
-module.exports = nextConfig; // Use CommonJS export
+module.exports = nextConfig;
