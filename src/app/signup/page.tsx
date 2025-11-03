@@ -39,9 +39,9 @@ const SignUpPage = () => {
   };
 
   return (
-    <div className="w-full h-screen flex flex-col items-center bg-gray-50">
+    <div className="w-full h-screen flex flex-col items-center bg-black-300">
       <div className="flex flex-col items-center gap-6 mt-10">
-        <Card className="w-[350px] border border-gray-300 shadow-sm">
+        <Card className="w-[350px] border border-black-300 shadow-sm">
           <CardContent className="p-6 flex flex-col gap-4">
             <div className="flex flex-col items-center mb-6">
               <h1
@@ -139,7 +139,7 @@ const SignUpPage = () => {
           </CardContent>
         </Card>
 
-        <Card className="w-[350px] border border-gray-300 mt-3 p-4 text-center text-sm">
+        <Card className="w-[350px] border border-black-300 mt-3 p-4 text-center text-sm">
           Have an account?{" "}
           <button
             onClick={() => router.push("/signin")}

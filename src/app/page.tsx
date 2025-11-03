@@ -220,17 +220,17 @@ export default function Home() {
   if (loading || !user) return <div className="text-white">Loading...</div>;
 
   return (
-    <div className="min-h-screen bg-black text-white flex justify-center">
+    <div className="min-h-screen bg-black text-white flex justify-center px-2 sm:px-4">
       <Toaster position="top-right" />
 
       {/* MAIN CONTAINER */}
-      <div className="w-full max-w-[950px] flex gap-10 px-4 py-10">
+      <div className="w-full max-w-[950px] flex flex-col lg:flex-row gap-6">
         {/* Center Feed */}
-        <div className="flex-1 max-w-[600px] mx-auto">
+        <div className="flex-1 max-w-full lg:max-w-[600px] mx-auto">
           <Stories users={users} />
 
           {posts.map((post) => (
-            <div key={post._id} className="mb-8">
+            <div key={post._id} className="mb-6">
               <PostCard
                 post={post}
                 currentUserId={user._id}
@@ -244,7 +244,7 @@ export default function Home() {
         </div>
 
         {/* Right Sidebar */}
-        <div className="hidden lg:block w-[320px] sticky top-10">
+        <div className="hidden xl:flex xl:flex-col w-[320px] gap-6 sticky top-6">
           <Sidebar username={user.username} fullname={user.fullname} />
         </div>
       </div>

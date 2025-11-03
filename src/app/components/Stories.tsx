@@ -1,26 +1,50 @@
 "use client";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-type User = { _id: string; username: string };
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { useRouter } from "next/navigation";
 
-export default function Stories({ users }: { users: User[] }) {
+type Story = {
+  _id: string;
+  username: string;
+  avatarUrl?: string;
+};
+
+type StoriesProps = {
+  users: Story[];
+};
+
+export default function Stories({ users }: StoriesProps) {
+  const router = useRouter();
+
   return (
-    <section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-4 overflow-x-auto flex gap-4 scrollbar-hide">
-      {users.map((u, idx) => (
-        <div key={u._id || idx} className="flex flex-col items-center gap-1">
-          <Avatar className="w-16 h-16 border-2 border-pink-500 p-1 rounded-full">
-            <AvatarImage
-              src={`https://ui-avatars.com/api/?name=${encodeURIComponent(
-                u.username
-              )}&background=random&size=64`}
-            />
-            <AvatarFallback>{u.username[0].toUpperCase()}</AvatarFallback>
-          </Avatar>
-          <span className="text-xs truncate w-16 text-center">
-            {u.username}
-          </span>
-        </div>
-      ))}
-    </section>
+    <div className="flex gap-4 overflow-x-auto py-4 px-2 border-b border-gray-800">
+      {users.map((user) => {
+        const avatarUrl =
+          user.avatarUrl ||
+          `https://ui-avatars.com/api/?name=${encodeURIComponent(
+            user.username
+          )}&background=random&size=64`;
+
+        return (
+          <Button
+            key={user._id}
+            variant="ghost"
+            className="flex flex-col items-center gap-1 p-0 min-w-[70px]"
+            onClick={() => router.push(`/${user.username}`)}
+          >
+            <Avatar className="w-14 h-14">
+              <AvatarImage src={avatarUrl} alt={user.username} />
+              <AvatarFallback>
+                {user.username[0]?.toUpperCase() || "U"}
+              </AvatarFallback>
+            </Avatar>
+            <span className="text-xs text-center truncate w-full">
+              {user.username}
+            </span>
+          </Button>
+        );
+      })}
+    </div>
   );
 }

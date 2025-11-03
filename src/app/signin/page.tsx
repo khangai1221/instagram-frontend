@@ -39,7 +39,7 @@ const SignInPage = () => {
       const data = await response.json();
 
       if (!response.ok) {
-        toast.error(data.message || "Signin failed");
+        toast.error(data.error);
         setLoading(false);
         return;
       }
@@ -65,7 +65,7 @@ const SignInPage = () => {
   };
 
   return (
-    <div className="w-full h-screen flex flex-col bg-gray-50">
+    <div className="w-full h-screen flex flex-col bg-black-50">
       <div className="flex flex-1 justify-center items-center gap-12">
         <div className="hidden md:flex">
           <Image
@@ -83,7 +83,7 @@ const SignInPage = () => {
             Instagram
           </h1>
 
-          <Card className="w-[350px] border border-gray-300 shadow-sm">
+          <Card className="w-[350px] border border-black-300 shadow-sm">
             <CardContent className="p-6 flex flex-col gap-4">
               <Input
                 placeholder="Phone number, username, or email"
@@ -132,7 +132,7 @@ const SignInPage = () => {
             </CardContent>
           </Card>
 
-          <div className="w-[350px] border border-gray-300 mt-3 p-4 text-center text-sm">
+          <div className="w-[350px] border border-black-300 mt-3 p-4 text-center text-sm">
             Don’t have an account?{" "}
             <button
               onClick={() => router.push("/signup")}

@@ -50,6 +50,7 @@ export default function PostCard({
     post.description || ""
   );
   const [newComment, setNewComment] = useState("");
+  const [visibleComments, setVisibleComments] = useState(5);
 
   const username = post.user?.username ?? "Unknown";
   const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(
@@ -70,14 +71,21 @@ export default function PostCard({
     setNewComment("");
   };
 
+  const toggleComments = () => {
+    if (visibleComments >= post.comments.length) {
+      setVisibleComments(5); // collapse back
+    } else {
+      setVisibleComments((prev) => prev + 5); // show next 5
+    }
+  };
+
+  const showToggleButton = post.comments.length > 5;
+
   return (
-    <Card
-      key={post._id}
-      className="bg-card text-card-foreground flex flex-col gap-6 border py-6 mb-6 w-full max-w-xl mx-auto rounded-none shadow-none"
-    >
+    <Card className="mb-6 w-full max-w-xl mx-auto bg-card text-card-foreground flex flex-col gap-6 border py-6 rounded-none shadow-none">
       <CardContent className="p-0">
         {/* Header */}
-        <div className="flex items-center gap-3 px-4">
+        <div className="flex items-center gap-3 px-4 py-3">
           <Avatar>
             <AvatarImage src={avatarUrl} />
             <AvatarFallback>{username[0]?.toUpperCase()}</AvatarFallback>
@@ -128,29 +136,32 @@ export default function PostCard({
         )}
 
         {/* Post Actions */}
-        <div className="px-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" size="icon" onClick={toggleLike}>
-              <Heart
-                className={`w-6 h-6 ${
-                  post.liked ? "text-red-500 fill-red-500" : ""
-                }`}
-              />
-            </Button>
+        <div className="px-4 py-3">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-3">
+              <Button variant="ghost" size="icon" onClick={toggleLike}>
+                <Heart
+                  className={`w-6 h-6 ${
+                    post.liked ? "text-red-500 fill-red-500" : ""
+                  }`}
+                />
+              </Button>
+              <Button variant="ghost" size="icon">
+                <MessageCircle className="w-6 h-6" />
+              </Button>
+              <Button variant="ghost" size="icon">
+                <Send className="w-6 h-6" />
+              </Button>
+            </div>
             <Button variant="ghost" size="icon">
-              <MessageCircle className="w-6 h-6" />
-            </Button>
-            <Button variant="ghost" size="icon">
-              <Send className="w-6 h-6" />
+              <Bookmark className="w-5 h-5" />
             </Button>
           </div>
-          <Button variant="ghost" size="icon">
-            <Bookmark className="w-5 h-5" />
-          </Button>
-        </div>
 
-        <div className="px-4 mt-2">
+          {/* Likes count */}
           <div className="text-sm font-semibold mb-1">{post.likes} likes</div>
+
+          {/* Description / Edit */}
           <div className="text-sm">
             <Link href={`/${username}`}>
               <span className="font-semibold mr-1">{username}</span>
@@ -174,30 +185,38 @@ export default function PostCard({
                 </Button>
               </div>
             ) : (
-              <span>{post.description}</span>
+              <span className="text-gray-700">{post.description}</span>
             )}
           </div>
 
           {/* Comments */}
-          <div className="mt-4 space-y-1">
-            {post.comments.length > 0 ? (
-              post.comments.map((comment, idx) => (
-                <div key={idx} className="text-sm">
-                  <Link href={`/${comment.user}`}>
-                    <span className="font-semibold mr-1">{comment.user}:</span>
-                  </Link>
-                  <span>{comment.text}</span>
-                  {comment.createdAt && (
-                    <span className="text-gray-400 text-xs ml-2">
-                      {format(comment.createdAt)}
-                    </span>
-                  )}
-                </div>
-              ))
-            ) : (
-              <div className="text-sm text-gray-500">No comments yet</div>
+          <div className="px-4 pt-2 mt-2 border-t space-y-1">
+            {showToggleButton && (
+              <button
+                onClick={toggleComments}
+                className="text-sm text-gray-400 hover:underline mb-1"
+              >
+                {visibleComments >= post.comments.length
+                  ? "Hide comments"
+                  : `View all ${post.comments.length} comments`}
+              </button>
             )}
 
+            {post.comments.slice(0, visibleComments).map((comment, index) => (
+              <div key={index} className="text-sm">
+                <Link href={`/${comment.user}`}>
+                  <span className="font-semibold mr-1">{comment.user}</span>
+                </Link>
+                <span>{comment.text}</span>
+                {comment.createdAt && (
+                  <span className="text-gray-400 text-xs ml-2">
+                    {format(comment.createdAt)}
+                  </span>
+                )}
+              </div>
+            ))}
+
+            {/* Add Comment */}
             <div className="flex items-center gap-2 mt-2">
               <Input
                 value={newComment}
