@@ -1,13 +1,9 @@
-import type { Metadata } from "next";
-import "./globals.css";
-import { Toaster } from "@/components/ui/sonner";
-import { UserContextProvider } from "./providers/UserProvider";
+// app/layout.tsx
+"use client";
 
-export const metadata: Metadata = {
-  title: "Instagram",
-  description:
-    "Instagram is a popular social media platform where users can share photos, videos, and stories with their followers. It allows people to connect, discover, and engage with content from friends, creators, and brands around the world. Instagram offers features like Reels for short videos, Stories for temporary updates, Direct Messages for private chats, and Explore for discovering trending content. It’s a visual-first platform that emphasizes creativity, self-expression, and community interaction.",
-};
+import "./globals.css";
+import Header from "@/app/components/Header";
+import { UserContextProvider } from "@/app/providers/UserProvider";
 
 export default function RootLayout({
   children,
@@ -15,11 +11,25 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body>
+    <html lang="en" className="dark">
+      <body className="bg-black text-white">
         <UserContextProvider>
-          {children}
-          <Toaster richColors position="top-center" />
+          <div className="flex">
+            {/* Left Sidebar Navigation */}
+            <Header />
+
+            {/* Main Content */}
+            <main className="flex-1 ml-20 sm:ml-64 min-h-screen overflow-y-auto">
+              {children}
+            </main>
+
+            {/* Right Sidebar (Suggestions) */}
+            <aside className="hidden xl:block w-80 border-l border-gray-800 p-6">
+              <div className="sticky top-6">
+                {/* Add your Sidebar.tsx or suggestions here */}
+              </div>
+            </aside>
+          </div>
         </UserContextProvider>
       </body>
     </html>

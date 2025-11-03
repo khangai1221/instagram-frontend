@@ -14,6 +14,7 @@ import { UserContext } from "../providers/UserProvider";
 const SignInPage = () => {
   const { setUser } = useContext(UserContext);
   const router = useRouter();
+  const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
   const [credential, setCredential] = useState("");
   const [password, setPassword] = useState("");
@@ -29,7 +30,7 @@ const SignInPage = () => {
     setLoading(true);
 
     try {
-      const response = await fetch("http://localhost:5500/signin", {
+      const response = await fetch(`${API_URL}/signin`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ credential, password }),

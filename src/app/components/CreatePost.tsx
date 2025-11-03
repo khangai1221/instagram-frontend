@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -43,7 +42,7 @@ export default function CreatePost({
             <Image
               src={imageUrl}
               alt="Post image"
-              width={800}
+              width={400}
               height={400}
               className="object-cover w-full h-full"
             />

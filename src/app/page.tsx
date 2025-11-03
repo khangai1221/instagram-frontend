@@ -1,122 +1,78 @@
+/* eslint-disable react-hooks/rules-of-hooks */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React, { useState, useContext, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { useRouter } from "next/navigation";
-import { jwtDecode } from "jwt-decode";
-import { UserContext } from "./providers/UserProvider";
-import Header from "./components/Header";
-import Stories from "./components/Stories";
-import CreatePost from "./components/CreatePost";
 import PostCard from "./components/PostCard";
+import Stories from "./components/Stories";
 import Sidebar from "./components/SideBar";
+import { UserContext } from "./providers/UserProvider";
+import { toast, Toaster } from "sonner";
+import { jwtDecode } from "jwt-decode";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
-
-type User = {
-  _id: string;
-  username: string;
-  fullname: string;
-};
-
-type PostType = {
-  _id: string;
-  user: {
-    _id: string;
-    username: string;
-    fullname: string;
-  };
-  imageUrl: string;
-  description: string;
-  liked: boolean;
-  likes: number;
-  likedUsers?: string[];
-  createdAt: string;
-  updatedAt?: string;
-};
-
-type JWTPayload = {
-  id: string;
-  username: string;
-  fullname?: string;
-};
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5500";
 
 export default function Home() {
-  const { user, setUser } = useContext(UserContext);
-  const [users, setUsers] = useState<User[]>([]);
-  const [posts, setPosts] = useState<PostType[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [newPostDescription, setNewPostDescription] = useState("");
-  const [newPostImage, setNewPostImage] = useState("");
-  const [posting, setPosting] = useState(false);
-
   const router = useRouter();
+  const { user, setUser } = useContext(UserContext);
+  const [loading, setLoading] = useState(true);
+  const [posts, setPosts] = useState<any[]>([]);
+  const [users, setUsers] = useState<any[]>([]);
+  const sampleUsers = [
+    { _id: "1", username: "jane_doe", fullname: "Jane Doe" },
+    { _id: "2", username: "john_smith", fullname: "John Smith" },
+    { _id: "3", username: "alice", fullname: "Alice Johnson" },
+  ];
 
+  // Authenticate user
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) {
+    const storedToken = localStorage.getItem("token");
+    if (!storedToken) {
       router.push("/signin");
       return;
     }
-
     try {
-      const payload: JWTPayload = jwtDecode(token);
+      const payload: any = jwtDecode(storedToken);
       if (!payload.id || !payload.username) throw new Error("Invalid token");
 
       setUser({
         _id: payload.id,
         username: payload.username,
         fullname: payload.fullname || "No Name",
-        avatar: undefined,
         password: "",
         email: null,
         phone: null,
       });
-
-      setLoading(false);
     } catch (err) {
-      console.error("JWT invalid:", err);
+      console.error("Invalid JWT:", err);
       localStorage.removeItem("token");
       router.push("/signin");
+    } finally {
+      setLoading(false);
     }
-  }, [router, setUser]);
+  }, [router]);
 
+  // Fetch posts
   useEffect(() => {
-    async function fetchUsers() {
-      const token = localStorage.getItem("token");
-      if (!token) return;
+    if (!user) return;
 
-      try {
-        const res = await fetch(`${API_URL}/users`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const data = await res.json();
-        setUsers(data.body || []);
-      } catch (err) {
-        console.error("Failed to fetch users:", err);
-      }
-    }
-
-    fetchUsers();
-  }, []);
-
-  useEffect(() => {
     async function fetchPosts() {
-      const token = localStorage.getItem("token");
-      if (!token || !user) return;
-
       try {
         const res = await fetch(`${API_URL}/posts`, {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
         });
-        const data: PostType[] = await res.json();
-
+        const data = await res.json();
         setPosts(
-          data.map((p) => ({
+          data.map((p: any) => ({
             ...p,
-            liked: p.likedUsers?.includes(user._id) ?? false,
+            liked: p.likedUsers?.includes(user._id ?? "") ?? false,
           }))
         );
       } catch (err) {
+        toast.error("Failed to fetch posts");
         console.error("Failed to fetch posts:", err);
       }
     }
@@ -124,11 +80,27 @@ export default function Home() {
     fetchPosts();
   }, [user]);
 
-  if (loading || !user) return <div>Loading...</div>;
+  // Fetch users for Stories
+  useEffect(() => {
+    async function fetchUsers() {
+      try {
+        const res = await fetch(`${API_URL}/users`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        });
+        const data = await res.json();
+        setUsers(data.body || []);
+      } catch (err) {
+        toast.error("Failed to fetch users");
+        console.error("Failed to fetch users:", err);
+      }
+    }
 
+    fetchUsers();
+  }, []);
+
+  // Toggle like
   const toggleLike = async (postId: string) => {
-    const post = posts.find((p) => p._id === postId);
-    if (!post || !user) return;
+    if (!user?._id) return;
 
     try {
       const res = await fetch(`${API_URL}/posts/${postId}/like`, {
@@ -137,151 +109,145 @@ export default function Home() {
         body: JSON.stringify({ userId: user._id }),
       });
 
-      const data = await res.json();
-      if (!res.ok) return console.error("Like failed:", data.message);
+      const updated = await res.json();
+
+      if (!res.ok) {
+        toast.error(updated.message || "Failed to toggle like");
+        return;
+      }
 
       setPosts((prev) =>
         prev.map((p) =>
-          p._id === postId ? { ...p, liked: !p.liked, likes: data.likes } : p
+          p._id === postId
+            ? {
+                ...p,
+                likes: updated.likes,
+                likedUsers: updated.likedUsers,
+                liked: updated.likedUsers.includes(user._id),
+              }
+            : p
         )
       );
     } catch (err) {
-      console.error("Error liking post:", err);
+      console.error(err);
+      toast.error("Failed to toggle like");
     }
   };
 
-  const createPost = async () => {
-    if (!newPostDescription || !newPostImage || !user) return;
-    setPosting(true);
-
-    const token = localStorage.getItem("token");
-
-    try {
-      const res = await fetch(`${API_URL}/posts`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          description: newPostDescription,
-          imageUrl: newPostImage, // generated by Google AI
-          userId: user._id,
-        }),
-      });
-
-      const data = await res.json();
-      if (!res.ok) return console.error("Failed to create post:", data.message);
-
-      setPosts((prev) => [
-        {
-          _id: data.body._id,
-          user: {
-            _id: user._id,
-            username: user.username,
-            fullname: user.fullname,
-          },
-          imageUrl: newPostImage,
-          description: newPostDescription,
-          liked: false,
-          likes: 0,
-          createdAt: data.body.createdAt,
-          updatedAt: data.body.updatedAt,
-        },
-        ...prev,
-      ]);
-
-      setNewPostDescription("");
-      setNewPostImage("");
-    } catch (err) {
-      console.error("Error creating post:", err);
-    } finally {
-      setPosting(false);
-    }
-  };
-
-  const deletePost = async (postId: string) => {
-    if (!user) return;
-    const token = localStorage.getItem("token");
-    if (!token) return;
-
-    try {
-      const res = await fetch(`${API_URL}/posts/${postId}`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ userId: user._id }),
-      });
-
-      const data = await res.json();
-      if (!res.ok) return console.error("Failed to delete post:", data.message);
-
-      setPosts((prev) => prev.filter((p) => p._id !== postId));
-    } catch (err) {
-      console.error("Error deleting post:", err);
-    }
-  };
-
+  // Edit post
   const editPost = async (postId: string, newDescription: string) => {
     if (!user) return;
-    const token = localStorage.getItem("token");
-    if (!token) return;
 
     try {
       const res = await fetch(`${API_URL}/posts/${postId}`, {
         method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ userId: user._id, description: newDescription }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ description: newDescription, userId: user._id }),
       });
+      const updated = await res.json();
 
-      const data = await res.json();
-      if (!res.ok) return console.error("Failed to edit post:", data.message);
+      if (!res.ok) {
+        toast.error(updated.message || "Failed to edit post");
+        return;
+      }
 
       setPosts((prev) =>
         prev.map((p) =>
-          p._id === postId ? { ...p, description: newDescription } : p
+          p._id === postId ? { ...p, description: updated.post.description } : p
         )
       );
     } catch (err) {
-      console.error("Error editing post:", err);
+      console.error(err);
+      toast.error("Failed to edit post");
     }
   };
 
-  return (
-    <div className="min-h-screen bg-gray-50 text-gray-900">
-      <Header />
-      <Stories users={users} />
+  // Delete post
+  const deletePost = async (postId: string) => {
+    if (!user) return;
 
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-3 gap-6 py-6">
-        <section className="lg:col-span-2 flex flex-col">
-          <CreatePost
-            description={newPostDescription}
-            setDescription={setNewPostDescription}
-            imageUrl={newPostImage}
-            setImageUrl={setNewPostImage}
-            createPost={createPost}
-            posting={posting}
-          />
+    try {
+      const res = await fetch(`${API_URL}/posts/${postId}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: user._id }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        toast.error(data.message || "Failed to delete post");
+        return;
+      }
+
+      setPosts((prev) => prev.filter((p) => p._id !== postId));
+      toast.success("Post deleted successfully");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to delete post");
+    }
+  };
+
+  // Add comment
+  const addComment = async (postId: string, text: string) => {
+    if (!user) return;
+
+    try {
+      const res = await fetch(`${API_URL}/posts/${postId}/comments`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: user._id,
+          username: user.username,
+          text,
+        }),
+      });
+
+      const updatedPost = await res.json();
+
+      if (!res.ok) {
+        toast.error(updatedPost.message || "Failed to add comment");
+        return;
+      }
+
+      setPosts((prev) => prev.map((p) => (p._id === postId ? updatedPost : p)));
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to add comment");
+    }
+  };
+
+  if (loading || !user) return <div className="text-white">Loading...</div>;
+
+  return (
+    <div className="min-h-screen bg-black text-white flex justify-center">
+      <Toaster position="top-right" />
+
+      {/* MAIN CONTAINER */}
+      <div className="w-full max-w-[950px] flex gap-10 px-4 py-10">
+        {/* Center Feed */}
+        <div className="flex-1 max-w-[600px] mx-auto">
+          <Stories users={users} />
 
           {posts.map((post) => (
-            <PostCard
-              key={post._id}
-              post={post}
-              toggleLike={toggleLike}
-              currentUserId={user._id}
-              deletePost={deletePost}
-              editPost={editPost}
-            />
+            <div key={post._id} className="mb-8">
+              <PostCard
+                post={post}
+                currentUserId={user._id}
+                toggleLike={() => toggleLike(post._id)}
+                editPost={(id, desc) => editPost(id, desc)}
+                deletePost={(id) => deletePost(id)}
+                addComment={(id, text) => addComment(id, text)}
+              />
+            </div>
           ))}
-        </section>
+        </div>
 
-        <Sidebar username={user.username} fullname={user.fullname} />
-      </main>
+        {/* Right Sidebar */}
+        <div className="hidden lg:block w-[320px] sticky top-10">
+          <Sidebar username={user.username} fullname={user.fullname} />
+        </div>
+      </div>
     </div>
   );
 }

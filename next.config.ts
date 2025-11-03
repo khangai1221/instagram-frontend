@@ -8,6 +8,9 @@ const nextConfig: NextConfig = {
       "chatgpt.com",
       "images.unsplash.com",
       "localhost:3001/_next/",
+      "unsplash.com",
+      "ui-avatars.com",
+      "plus.unsplash.com",
     ],
   },
 };
