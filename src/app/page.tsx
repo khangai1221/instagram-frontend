@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/rules-of-hooks */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
@@ -11,7 +10,8 @@ import { UserContext } from "./providers/UserProvider";
 import { toast, Toaster } from "sonner";
 import { jwtDecode } from "jwt-decode";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://instagram-backend1.vercel.app/";
+const API_URL =
+  process.env.NEXT_PUBLIC_API_URL || "https://instagram-backend1.vercel.app/";
 
 export default function Home() {
   const router = useRouter();
@@ -19,11 +19,6 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [posts, setPosts] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
-  const sampleUsers = [
-    { _id: "1", username: "jane_doe", fullname: "Jane Doe" },
-    { _id: "2", username: "john_smith", fullname: "John Smith" },
-    { _id: "3", username: "alice", fullname: "Alice Johnson" },
-  ];
 
   // Authenticate user
   useEffect(() => {
@@ -51,7 +46,7 @@ export default function Home() {
     } finally {
       setLoading(false);
     }
-  }, [router]);
+  }, [router, setUser]);
 
   // Fetch posts
   useEffect(() => {
@@ -68,7 +63,7 @@ export default function Home() {
         setPosts(
           data.map((p: any) => ({
             ...p,
-            liked: p.likedUsers?.includes(user._id ?? "") ?? false,
+            liked: user ? p.likedUsers?.includes(user._id) ?? false : false,
           }))
         );
       } catch (err) {
