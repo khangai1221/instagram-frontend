@@ -163,7 +163,7 @@ export default function ProfilePage() {
               profile.avatar ||
               `https://ui-avatars.com/api/?name=${profile.username}`
             }
-            alt={profile.username}
+            alt="someone's profile"
             fill
             className="object-cover"
           />
