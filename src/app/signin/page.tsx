@@ -1,4 +1,5 @@
 "use client";
+
 import { useState, useContext } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -14,7 +15,9 @@ import { UserContext } from "../providers/UserProvider";
 const SignInPage = () => {
   const { setUser } = useContext(UserContext);
   const router = useRouter();
-  const API_URL = process.env.NEXT_PUBLIC_API_URL;
+  const API_URL =
+    process.env.NEXT_PUBLIC_API_URL ||
+    "https://instagram-backend-gbgz.onrender.com";
 
   const [credential, setCredential] = useState("");
   const [password, setPassword] = useState("");
@@ -30,31 +33,39 @@ const SignInPage = () => {
     setLoading(true);
 
     try {
-      const response = await fetch(`${API_URL}/signin`, {
+      const res = await fetch(`${API_URL}/auth/signin`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ credential, password }),
       });
 
-      const data = await response.json();
+      const data = await res.json();
 
-      if (!response.ok) {
-        toast.error(data.error);
+      if (!res.ok) {
+        toast.error(data.message || "Invalid credentials");
         setLoading(false);
         return;
       }
 
-      // Save JWT in localStorage
+      // Save JWT and user in localStorage
       if (data.body.token) {
         localStorage.setItem("token", data.body.token);
+        localStorage.setItem("user", JSON.stringify(data.body));
       }
 
       // Update UserContext
-      setUser(data.body);
+      setUser({
+        _id: data.body._id,
+        username: data.body.username,
+        fullname: data.body.fullname,
+        email: data.body.email,
+        phone: data.body.phone,
+      });
 
       toast.success(data.message || "Signed in successfully");
-      setPassword("");
+
       setCredential("");
+      setPassword("");
       router.push("/"); // Redirect to home
     } catch (err) {
       console.error("Signin error:", err);
@@ -65,8 +76,8 @@ const SignInPage = () => {
   };
 
   return (
-    <div className="w-full h-screen flex flex-col bg-black-50">
-      <div className="flex flex-1 justify-center items-center gap-12">
+    <div className="w-full h-screen flex flex-col bg-black text-white">
+      <div className="flex flex-1 justify-center items-center gap-12 px-2 sm:px-4">
         <div className="hidden md:flex">
           <Image
             src="/instagram-photo.png"
@@ -83,13 +94,13 @@ const SignInPage = () => {
             Instagram
           </h1>
 
-          <Card className="w-[350px] border border-black-300 shadow-sm">
+          <Card className="w-[350px] border border-gray-700 shadow-sm bg-black">
             <CardContent className="p-6 flex flex-col gap-4">
               <Input
                 placeholder="Phone number, username, or email"
                 value={credential}
                 onChange={(e) => setCredential(e.target.value)}
-                className="rounded-md"
+                className="rounded-md bg-gray-900 text-white placeholder-gray-400"
               />
 
               <div className="relative">
@@ -98,12 +109,12 @@ const SignInPage = () => {
                   type={passwordShown ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="rounded-md pr-10"
+                  className="rounded-md pr-10 bg-gray-900 text-white placeholder-gray-400"
                 />
                 <button
                   type="button"
                   onClick={() => setPasswordShown(!passwordShown)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
                 >
                   {passwordShown ? <Eye size={18} /> : <EyeClosed size={18} />}
                 </button>
@@ -118,21 +129,21 @@ const SignInPage = () => {
               </Button>
 
               <div className="flex items-center gap-3 my-2">
-                <div className="flex-1 h-px bg-gray-300"></div>
+                <div className="flex-1 h-px bg-gray-700"></div>
                 <span className="text-gray-500 text-sm font-semibold">OR</span>
-                <div className="flex-1 h-px bg-gray-300"></div>
+                <div className="flex-1 h-px bg-gray-700"></div>
               </div>
 
               <Button
                 variant="ghost"
-                className="w-full text-blue-900 font-semibold hover:bg-transparent"
+                className="w-full text-blue-400 font-semibold hover:bg-transparent"
               >
                 Continue with Facebook
               </Button>
             </CardContent>
           </Card>
 
-          <div className="w-[350px] border border-black-300 mt-3 p-4 text-center text-sm">
+          <div className="w-[350px] border border-gray-700 mt-3 p-4 text-center text-sm">
             Don’t have an account?{" "}
             <button
               onClick={() => router.push("/signup")}

@@ -23,7 +23,7 @@ const SignUpPage = () => {
     }
 
     const response = await fetch(
-      "https://instagram-backend-gbgz.onrender.com/signup",
+      "https://instagram-backend-gbgz.onrender.com/auth/signup",
       {
         headers: { "Content-Type": "application/json" },
         method: "POST",
