@@ -14,7 +14,7 @@ export default function CreatePost() {
 
     try {
       const res = await fetch(
-        "http://https://instagram-backend-gbgz.onrender.com/posts/upload",
+        "//https://instagram-backend-gbgz.onrender.com/posts/upload",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
