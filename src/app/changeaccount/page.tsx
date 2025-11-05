@@ -42,11 +42,14 @@ export default function SwitchAccount() {
     setError(null);
 
     try {
-      const res = await fetch(`https://instagram-backend1.vercel.app/auth/signin`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ credential, password }),
-      });
+      const res = await fetch(
+        `https://instagram-backend-gbgz.onrender.com/auth/signin`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ credential, password }),
+        }
+      );
 
       const data = await res.json();
 

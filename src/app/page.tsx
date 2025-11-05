@@ -11,7 +11,8 @@ import { toast, Toaster } from "sonner";
 import { jwtDecode } from "jwt-decode";
 
 const API_URL =
-  process.env.NEXT_PUBLIC_API_URL || "https://instagram-backend1.vercel.app/";
+  process.env.NEXT_PUBLIC_API_URL ||
+  "https://instagram-backend-gbgz.onrender.com";
 
 export default function Home() {
   const router = useRouter();

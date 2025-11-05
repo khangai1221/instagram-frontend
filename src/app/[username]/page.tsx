@@ -37,7 +37,9 @@ export default function ProfilePage() {
   const [progress, setProgress] = useState(13);
   const [isFollowing, setIsFollowing] = useState(false);
 
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://instagram-backend1.vercel.app/";
+  const API_URL =
+    process.env.NEXT_PUBLIC_API_URL ||
+    "https://instagram-backend-gbgz.onrender.com";
 
   // Animate progress bar while loading
   useEffect(() => {

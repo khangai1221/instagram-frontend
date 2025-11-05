@@ -51,9 +51,12 @@ export const UserContextProvider = ({ children }: React.PropsWithChildren) => {
       }
 
       try {
-        const response = await fetch("https://instagram-backend1.vercel.app/me", {
-          headers: { Authorization: "Bearer " + token },
-        });
+        const response = await fetch(
+          "https://instagram-backend-gbgz.onrender.com/me",
+          {
+            headers: { Authorization: "Bearer " + token },
+          }
+        );
 
         if (!response.ok) {
           throw new Error("Invalid token");

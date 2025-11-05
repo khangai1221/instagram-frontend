@@ -7,7 +7,9 @@ import { Progress } from "@/components/ui/progress";
 import { UserContext } from "@/app/providers/UserProvider";
 import { toast, Toaster } from "sonner";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://instagram-backend1.vercel.app/";
+const API_URL =
+  process.env.NEXT_PUBLIC_API_URL ||
+  "https://instagram-backend-gbgz.onrender.com";
 
 export default function PostPage() {
   const { id } = useParams();
