@@ -170,7 +170,9 @@ export default function ProfilePage() {
         </div>
         <div className="flex-1">
           <div className="flex items-center gap-4">
-            <h1 className="text-2xl font-semibold">{profile.username}</h1>
+            <h1 className="text-2xl font-semibold">
+              {profile.username || "User doesnt exist"}
+            </h1>
             {user?._id !== profile._id && (
               <Button
                 onClick={toggleFollow}
