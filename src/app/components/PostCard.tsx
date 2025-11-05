@@ -51,12 +51,11 @@ export default function PostCard({
   );
   const [newComment, setNewComment] = useState("");
   const [visibleComments, setVisibleComments] = useState(5);
-
   const username = post.user?.username ?? "Unknown";
   const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(
     username
   )}&background=random&size=64`;
-  const isOwner = post.user._id === currentUserId;
+  const isOwner = post.user?._id === currentUserId;
 
   const handleEditSave = () => {
     if (editedDescription.trim() !== post.description && editPost) {
@@ -79,7 +78,7 @@ export default function PostCard({
     }
   };
 
-  const showToggleButton = post.comments.length > 5;
+  const showToggleButton = (post.comments?.length ?? 0) > 5;
 
   return (
     <Card className="mb-6 w-full max-w-xl mx-auto bg-card text-card-foreground flex flex-col gap-6 border py-6 rounded-none shadow-none">

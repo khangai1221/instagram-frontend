@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
+import { X } from "lucide-react";
 import { useState, useEffect, useContext } from "react";
 import { useParams, useRouter } from "next/navigation";
 import PostCard from "@/app/components/PostCard";
@@ -154,6 +155,13 @@ export default function PostPage() {
 
   return (
     <div className="max-w-xl mx-auto mt-6">
+      <button
+        onClick={() => router.back()}
+        className="absolute top-4 right-4 p-2 rounded-full hover:bg-zinc-800 transition"
+      >
+        <X size={22} />
+      </button>
+
       <Toaster position="top-right" />
       <PostCard
         post={{

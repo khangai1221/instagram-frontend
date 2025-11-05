@@ -5,10 +5,8 @@ type User = {
   _id: string;
   username: string;
   fullname: string;
-  password: string;
-  email: string | null;
-  phone: string | null;
-  avatar?: string;
+  email?: string | null;
+  phone?: string | null;
 };
 
 type UserContextType = {
@@ -28,41 +26,33 @@ export const UserContext = createContext<UserContextType>({
 });
 
 export const UserContextProvider = ({ children }: React.PropsWithChildren) => {
-  const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  // Get token from localStorage on mount
+  // Load token from localStorage on mount
   useEffect(() => {
     const storedToken = localStorage.getItem("authToken");
-    if (storedToken && storedToken !== "null") {
-      setToken(JSON.parse(storedToken));
-    } else {
-      setLoading(false); // ✅ ensure it doesn’t get stuck
-    }
+    if (storedToken) setToken(JSON.parse(storedToken));
+    else setLoading(false);
   }, []);
 
-  // Fetch user info when token changes
+  // Fetch user when token changes
   useEffect(() => {
-    const authenticateUser = async () => {
+    const fetchUser = async () => {
       if (!token) {
         setLoading(false);
         return;
       }
 
       try {
-        const response = await fetch(
-          "https://instagram-backend-gbgz.onrender.com/me",
-          {
-            headers: { Authorization: "Bearer " + token },
-          }
-        );
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/me`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
 
-        if (!response.ok) {
-          throw new Error("Invalid token");
-        }
+        if (!res.ok) throw new Error("Invalid token");
 
-        const data = await response.json();
+        const data = await res.json();
         setUser(data.body);
       } catch (err) {
         console.error("Auth failed:", err);
@@ -70,11 +60,11 @@ export const UserContextProvider = ({ children }: React.PropsWithChildren) => {
         setToken(null);
         setUser(null);
       } finally {
-        setLoading(false); // ✅ always stop loading
+        setLoading(false);
       }
     };
 
-    authenticateUser();
+    fetchUser();
   }, [token]);
 
   return (

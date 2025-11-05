@@ -67,7 +67,6 @@ export default function ProfilePage() {
         _id: payload.id,
         username: payload.username,
         fullname: payload.fullname || "No Name",
-        password: "",
         email: null,
         phone: null,
       });
