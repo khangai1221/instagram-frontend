@@ -12,6 +12,31 @@ export default function CreatePost() {
   const [imageUrl, setImageUrl] = useState("");
   const [userId, setUserId] = useState("");
   const { user, setUser } = useContext(UserContext);
+  // Authenticate user
+  useEffect(() => {
+    const storedToken = localStorage.getItem("token");
+    if (!storedToken) {
+      router.push("/signin");
+      return;
+    }
+
+    try {
+      const payload: any = jwtDecode(storedToken);
+      if (!payload.id || !payload.username) throw new Error("Invalid token");
+
+      setUser({
+        _id: payload.id,
+        username: payload.username,
+        fullname: payload.fullname || "No Name",
+        email: null,
+        phone: null,
+      });
+    } catch (err) {
+      console.error("Invalid JWT:", err);
+      localStorage.removeItem("token");
+      router.push("/signin");
+    }
+  }, [router, setUser]);
   // Get userId from localStorage on component mount
   useEffect(() => {
     const user = localStorage.getItem("user"); // assume "user" stores JSON with _id
@@ -90,4 +115,40 @@ export default function CreatePost() {
       </Button>
     </div>
   );
+}
+function jwtDecode(storedToken: string): any {
+  if (!storedToken) throw new Error("Empty token");
+  const parts = storedToken.split(".");
+  if (parts.length < 2) throw new Error("Invalid JWT format");
+
+  const payload = parts[1];
+
+  // base64url -> base64
+  const base64 = payload.replace(/-/g, "+").replace(/_/g, "/");
+  const pad = base64.length % 4;
+  const padded = base64 + (pad ? "=".repeat(4 - pad) : "");
+
+  // Try browser atob first, fall back to Node Buffer if available
+  try {
+    const decoded =
+      typeof atob === "function"
+        ? atob(padded)
+        : Buffer.from(padded, "base64").toString("utf-8");
+
+    // atob returns a binary string; convert to proper UTF-8
+    try {
+      const json = decodeURIComponent(
+        decoded
+          .split("")
+          .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+          .join("")
+      );
+      return JSON.parse(json);
+    } catch {
+      // If decodeURIComponent fails, assume decoded is already valid JSON
+      return JSON.parse(decoded);
+    }
+  } catch (err) {
+    throw new Error("Failed to decode JWT payload: " + (err as Error).message);
+  }
 }

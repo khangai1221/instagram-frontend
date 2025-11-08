@@ -75,6 +75,30 @@ export default function ProfilePage() {
       localStorage.removeItem("token");
       router.push("/signin");
     }
+  }, [router, setUser]); // Authenticate user
+  useEffect(() => {
+    const storedToken = localStorage.getItem("token");
+    if (!storedToken) {
+      router.push("/signin");
+      return;
+    }
+
+    try {
+      const payload: any = jwtDecode(storedToken);
+      if (!payload.id || !payload.username) throw new Error("Invalid token");
+
+      setUser({
+        _id: payload.id,
+        username: payload.username,
+        fullname: payload.fullname || "No Name",
+        email: null,
+        phone: null,
+      });
+    } catch (err) {
+      console.error("Invalid JWT:", err);
+      localStorage.removeItem("token");
+      router.push("/signin");
+    }
   }, [router, setUser]);
 
   // Fetch profile & posts
