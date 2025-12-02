@@ -14,6 +14,7 @@ type JWTPayload = {
   username: string;
   fullname?: string;
 };
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 export default function CreatePost() {
   const router = useRouter();
   const [description, setDescription] = useState("");
@@ -63,7 +64,7 @@ export default function CreatePost() {
     }
 
     try {
-      const res = await fetch("/api/auth/posts", {
+      const res = await fetch(`${API_URL}/auth/posts`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ description, imageUrl, userId }),

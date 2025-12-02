@@ -11,6 +11,7 @@ import { UserContext } from "../providers/UserProvider";
 const SignUpPage = () => {
   const { user } = useContext(UserContext);
   const router = useRouter();
+  const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
   const [credential, setCredential] = useState("");
   const [password, setPassword] = useState("");
@@ -25,7 +26,7 @@ const SignUpPage = () => {
   }
 
   const handleSignUp = async () => {
-    const response = await fetch("/api/auth/signup", {
+    const response = await fetch(`${API_URL}/auth/signup`, {
       headers: {
         "Content-Type": "application/json",
       },

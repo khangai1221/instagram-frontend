@@ -10,7 +10,7 @@ import { UserContext } from "./providers/UserProvider";
 import { toast, Toaster } from "sonner";
 import { jwtDecode } from "jwt-decode";
 
-const API_URL = "/api";
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function Home() {
   const router = useRouter();

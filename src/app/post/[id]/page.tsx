@@ -8,7 +8,7 @@ import { Progress } from "@/components/ui/progress";
 import { UserContext } from "@/app/providers/UserProvider";
 import { toast, Toaster } from "sonner";
 
-const API_URL = "/api";
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function PostPage() {
   const { id } = useParams();
