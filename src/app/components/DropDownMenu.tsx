@@ -10,14 +10,12 @@ import {
 import { Pencil, Trash } from "lucide-react";
 
 type DropdownMenuDemoProps = {
-  postId: string;
   isOwner: boolean;
   editPost: () => void;
   deletePost: () => void;
 };
 
 export function DropdownMenuDemo({
-  postId,
   isOwner,
   editPost,
   deletePost,

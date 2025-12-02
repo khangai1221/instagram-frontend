@@ -6,12 +6,20 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { UserContext } from "../providers/UserProvider";
 import { useRouter } from "next/navigation";
+import { jwtDecode } from "jwt-decode";
+import Image from "next/image";
+
+type JWTPayload = {
+  id: string;
+  username: string;
+  fullname?: string;
+};
 export default function CreatePost() {
   const router = useRouter();
   const [description, setDescription] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [userId, setUserId] = useState("");
-  const { user, setUser } = useContext(UserContext);
+  const { setUser } = useContext(UserContext);
   // Authenticate user
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
@@ -21,7 +29,7 @@ export default function CreatePost() {
     }
 
     try {
-      const payload: any = jwtDecode(storedToken);
+      const payload = jwtDecode(storedToken) as JWTPayload;
       if (!payload.id || !payload.username) throw new Error("Invalid token");
 
       setUser({
@@ -99,9 +107,11 @@ export default function CreatePost() {
 
       {imageUrl && (
         <div className="mb-4">
-          <img
+          <Image
             src={imageUrl}
             alt="Preview"
+            width={400}
+            height={256}
             className="w-full rounded-md object-cover max-h-64"
           />
         </div>
@@ -112,40 +122,4 @@ export default function CreatePost() {
       </Button>
     </div>
   );
-}
-function jwtDecode(storedToken: string): any {
-  if (!storedToken) throw new Error("Empty token");
-  const parts = storedToken.split(".");
-  if (parts.length < 2) throw new Error("Invalid JWT format");
-
-  const payload = parts[1];
-
-  // base64url -> base64
-  const base64 = payload.replace(/-/g, "+").replace(/_/g, "/");
-  const pad = base64.length % 4;
-  const padded = base64 + (pad ? "=".repeat(4 - pad) : "");
-
-  // Try browser atob first, fall back to Node Buffer if available
-  try {
-    const decoded =
-      typeof atob === "function"
-        ? atob(padded)
-        : Buffer.from(padded, "base64").toString("utf-8");
-
-    // atob returns a binary string; convert to proper UTF-8
-    try {
-      const json = decodeURIComponent(
-        decoded
-          .split("")
-          .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
-          .join("")
-      );
-      return JSON.parse(json);
-    } catch {
-      // If decodeURIComponent fails, assume decoded is already valid JSON
-      return JSON.parse(decoded);
-    }
-  } catch (err) {
-    throw new Error("Failed to decode JWT payload: " + (err as Error).message);
-  }
 }
