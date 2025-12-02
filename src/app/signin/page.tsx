@@ -31,8 +31,8 @@ const SignInPage = () => {
     setLoading(true);
 
     try {
-      console.log("Making signin request to:", "/api/signin");
-      const res = await fetch("/api/signin", {
+      console.log("Making signin request to:", "/api/auth/signin");
+      const res = await fetch("/api/auth/signin", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ credential, password }),

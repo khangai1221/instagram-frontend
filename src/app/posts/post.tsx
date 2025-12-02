@@ -29,7 +29,7 @@ export default function PostsPage() {
 
   const fetchPosts = async () => {
     try {
-      const res = await fetch(`${API_URL}/posts`);
+      const res = await fetch(`${API_URL}/auth/posts`);
       const data = await res.json();
       setPosts(data);
     } catch (err) {
@@ -47,7 +47,7 @@ export default function PostsPage() {
     if (!newDescription || !newImageUrl) return;
 
     try {
-      const res = await fetch(`${API_URL}/posts`, {
+      const res = await fetch(`${API_URL}/auth/posts`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -71,7 +71,7 @@ export default function PostsPage() {
 
   const handleDeletePost = async (id: string) => {
     try {
-      const res = await fetch(`${API_URL}/posts/${id}`, {
+      const res = await fetch(`${API_URL}/auth/posts/${id}`, {
         method: "DELETE",
       });
       const data = await res.json();
@@ -92,7 +92,7 @@ export default function PostsPage() {
     if (!updatedDescription || !updatedImageUrl) return;
 
     try {
-      const res = await fetch(`${API_URL}/posts/${id}`, {
+      const res = await fetch(`${API_URL}/auth/posts/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

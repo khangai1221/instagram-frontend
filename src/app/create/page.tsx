@@ -63,7 +63,7 @@ export default function CreatePost() {
     }
 
     try {
-      const res = await fetch("http://localhost:5500/posts", {
+      const res = await fetch("/api/auth/posts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ description, imageUrl, userId }),

@@ -21,7 +21,7 @@ export default function PostPage() {
   useEffect(() => {
     async function fetchPost() {
       try {
-        const res = await fetch(`${API_URL}/posts/${id}`);
+        const res = await fetch(`${API_URL}/auth/posts/${id}`);
         if (!res.ok) throw new Error("Failed to fetch post");
 
         const data = await res.json();
@@ -45,7 +45,7 @@ export default function PostPage() {
     }
 
     try {
-      const res = await fetch(`${API_URL}/posts/${post._id}/like`, {
+      const res = await fetch(`${API_URL}/auth/posts/${post._id}/like`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId: user._id }),
@@ -66,7 +66,7 @@ export default function PostPage() {
     if (!user || !post) return;
 
     try {
-      const res = await fetch(`${API_URL}/posts/${post._id}`, {
+      const res = await fetch(`${API_URL}/auth/posts/${post._id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ description: newDescription, userId: user._id }),
@@ -90,7 +90,7 @@ export default function PostPage() {
     if (!user || !post) return;
 
     try {
-      const res = await fetch(`${API_URL}/posts/${post._id}`, {
+      const res = await fetch(`${API_URL}/auth/posts/${post._id}`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId: user._id }),
@@ -117,7 +117,7 @@ export default function PostPage() {
     }
 
     try {
-      const res = await fetch(`${API_URL}/${post._id}/comments`, {
+      const res = await fetch(`${API_URL}/auth/posts/${post._id}/comments`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
