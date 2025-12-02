@@ -25,16 +25,13 @@ const SignUpPage = () => {
   }
 
   const handleSignUp = async () => {
-    const response = await fetch(
-      process.env.NEXT_PUBLIC_API_URL + "/auth/signup",
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-        method: "POST",
-        body: JSON.stringify({ credential, password, fullname, username }),
-      }
-    );
+    const response = await fetch("/api/auth/signup", {
+      headers: {
+        "Content-Type": "application/json",
+      },
+      method: "POST",
+      body: JSON.stringify({ credential, password, fullname, username }),
+    });
 
     const data = await response.json();
 
