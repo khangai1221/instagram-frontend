@@ -52,7 +52,7 @@ export default function Home() {
 
     async function fetchPosts() {
       try {
-        const res = await fetch(`${API_URL}/auth/posts`, {
+        const res = await fetch(`${API_URL}/posts`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
@@ -77,7 +77,7 @@ export default function Home() {
   useEffect(() => {
     async function fetchUsers() {
       try {
-        const res = await fetch(`${API_URL}/auth/users`, {
+        const res = await fetch(`${API_URL}/users`, {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
         const data = await res.json();
@@ -96,7 +96,7 @@ export default function Home() {
     if (!user?._id) return;
 
     try {
-      const res = await fetch(`${API_URL}/auth/posts/${postId}/like`, {
+      const res = await fetch(`${API_URL}/posts/${postId}/like`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId: user._id }),
@@ -136,7 +136,7 @@ export default function Home() {
     if (!user) return;
 
     try {
-      const res = await fetch(`${API_URL}/auth/posts/${postId}`, {
+      const res = await fetch(`${API_URL}/posts/${postId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ description: newDescription, userId: user._id }),
@@ -164,7 +164,7 @@ export default function Home() {
     if (!user) return;
 
     try {
-      const res = await fetch(`${API_URL}/auth/posts/${postId}`, {
+      const res = await fetch(`${API_URL}/posts/${postId}`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId: user._id }),
@@ -190,7 +190,7 @@ export default function Home() {
     if (!user) return;
 
     try {
-      const res = await fetch(`${API_URL}/auth/posts/${postId}/comments`, {
+      const res = await fetch(`${API_URL}/posts/${postId}/comments`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

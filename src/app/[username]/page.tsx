@@ -104,7 +104,7 @@ export default function ProfilePage() {
     const fetchProfileAndPosts = async () => {
       try {
         setLoading(true);
-        const profileRes = await fetch(`${API_URL}/auth/users/${username}`);
+        const profileRes = await fetch(`${API_URL}/users/${username}`);
         const profileData = await profileRes.json();
 
         setProfile({
@@ -116,7 +116,7 @@ export default function ProfilePage() {
         setIsFollowing(profileData.followers?.includes(user?._id) || false);
 
         const postsRes = await fetch(
-          `${API_URL}/auth/posts?userId=${profileData._id}`
+          `${API_URL}/posts?userId=${profileData._id}`
         );
         const postsData = await postsRes.json();
         setPosts(postsData);
@@ -134,7 +134,7 @@ export default function ProfilePage() {
     if (!user || !profile) return;
 
     try {
-      const res = await fetch(`${API_URL}/auth/users/${profile._id}/follow`, {
+      const res = await fetch(`${API_URL}/users/${profile._id}/follow`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ followerId: user._id }),
