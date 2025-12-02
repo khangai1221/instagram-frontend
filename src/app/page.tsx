@@ -10,9 +10,7 @@ import { UserContext } from "./providers/UserProvider";
 import { toast, Toaster } from "sonner";
 import { jwtDecode } from "jwt-decode";
 
-const API_URL =
-  process.env.NEXT_PUBLIC_API_URL ||
-  "https://instagram-backend-gbgz.onrender.com";
+const API_URL = "/api";
 
 export default function Home() {
   const router = useRouter();
@@ -122,6 +120,10 @@ export default function Home() {
               }
             : p
         )
+      );
+
+      toast.success(
+        updated.likedUsers.includes(user._id) ? "Post liked" : "Post unliked"
       );
     } catch (err) {
       console.error(err);

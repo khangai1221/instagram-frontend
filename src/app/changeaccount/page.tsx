@@ -42,14 +42,11 @@ export default function SwitchAccount() {
     setError(null);
 
     try {
-      const res = await fetch(
-        `https://instagram-backend-gbgz.onrender.com/auth/signin`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ credential, password }),
-        }
-      );
+      const res = await fetch(`http://localhost:5500/auth/signin`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ credential, password }),
+      });
 
       const data = await res.json();
 

@@ -11,6 +11,14 @@ const nextConfig = {
       "plus.unsplash.com",
     ],
   },
+  async rewrites() {
+    return [
+      {
+        source: "/api/:path*",
+        destination: "http://localhost:5500/:path*",
+      },
+    ];
+  },
 };
 
 module.exports = nextConfig;

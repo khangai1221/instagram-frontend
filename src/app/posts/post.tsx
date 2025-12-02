@@ -17,7 +17,7 @@ export default function PostsPage() {
   const [loading, setLoading] = useState(true);
   const [newDescription, setNewDescription] = useState("");
   const [newImageUrl, setNewImageUrl] = useState("");
-  const API_URL = process.env.NEXT_PUBLIC_API_URL;
+  const API_URL = "/api";
   const isValidUrl = (url: string) => {
     try {
       new URL(url);

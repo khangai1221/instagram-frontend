@@ -1,75 +1,48 @@
 "use client";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Eye, EyeClosed } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { UserContext } from "../providers/UserProvider";
 
 const SignUpPage = () => {
+  const { user } = useContext(UserContext);
+  const router = useRouter();
+
   const [credential, setCredential] = useState("");
   const [password, setPassword] = useState("");
   const [password2, setPassword2] = useState("");
   const [username, setUsername] = useState("");
   const [fullname, setFullname] = useState("");
   const [passwordShown, setPasswordShown] = useState(false);
-  const router = useRouter();
+
+  if (user) {
+    router.push("/");
+    return null;
+  }
 
   const handleSignUp = async () => {
-    console.log("handleSignUp called");
-    if (password !== password2) {
-      toast.error("Passwords do not match");
-      return;
-    }
-
-    // Validate password requirements
-    if (password.length < 6) {
-      toast.error("Password must be at least 6 characters");
-      return;
-    }
-    if (!/(?=.*[a-z])/.test(password)) {
-      toast.error("Password must contain at least one lowercase letter");
-      return;
-    }
-    if (!/(?=.*[A-Z])/.test(password)) {
-      toast.error("Password must contain at least one uppercase letter");
-      return;
-    }
-    if (!/(?=.*\d)/.test(password)) {
-      toast.error("Password must contain at least one digit");
-      return;
-    }
-    if (!/(?=.*[@$!%*?&])/.test(password)) {
-      toast.error("Password must contain at least one special character");
-      return;
-    }
-
-    try {
-      const response = await fetch(
-        "https://instagram-backend-gbgz.onrender.com/auth/signup",
-        {
-          headers: { "Content-Type": "application/json" },
-          method: "POST",
-          body: JSON.stringify({ credential, password, fullname, username }),
-        }
-      );
-
-      console.log("Signup fetch completed, status:", response.status);
-
-      const data = await response.json();
-      console.log("Signup response:", response.status, data);
-
-      if (!response.ok) {
-        toast.error(data.message || "Sign up failed");
-        return;
-      } else {
-        toast.success(data.message || "Signed Up Successfully");
-        router.push("/signin");
+    const response = await fetch(
+      process.env.NEXT_PUBLIC_API_URL + "/auth/signup",
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        method: "POST",
+        body: JSON.stringify({ credential, password, fullname, username }),
       }
-    } catch (error) {
-      console.error("Signup fetch error:", error);
-      toast.error("Network error. Please try again.");
+    );
+
+    const data = await response.json();
+
+    if (response.ok) {
+      toast.success(data.message);
+      router.push("/signin");
+    } else {
+      toast.error(data.message);
     }
   };
 

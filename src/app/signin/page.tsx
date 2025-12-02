@@ -15,9 +15,6 @@ import { UserContext } from "../providers/UserProvider";
 const SignInPage = () => {
   const { setUser } = useContext(UserContext);
   const router = useRouter();
-  const API_URL =
-    process.env.NEXT_PUBLIC_API_URL ||
-    "https://instagram-backend-gbgz.onrender.com";
 
   const [credential, setCredential] = useState("");
   const [password, setPassword] = useState("");
@@ -34,8 +31,8 @@ const SignInPage = () => {
     setLoading(true);
 
     try {
-      console.log("Making signin request to:", `${API_URL}/auth/signin`);
-      const res = await fetch(`${API_URL}/auth/signin`, {
+      console.log("Making signin request to:", "/api/auth/signin");
+      const res = await fetch("/api/auth/signin", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ credential, password }),
@@ -54,7 +51,7 @@ const SignInPage = () => {
 
       // Save JWT and user in localStorage
       if (data.body && data.body.token) {
-        localStorage.setItem("authToken", data.body.token);
+        localStorage.setItem("token", data.body.token);
         localStorage.setItem("user", JSON.stringify(data.body));
       }
 

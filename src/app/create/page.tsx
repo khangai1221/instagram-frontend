@@ -55,14 +55,11 @@ export default function CreatePost() {
     }
 
     try {
-      const res = await fetch(
-        "https://instagram-backend-gbgz.onrender.com/posts",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ description, imageUrl, userId }),
-        }
-      );
+      const res = await fetch("http://localhost:5500/posts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ description, imageUrl, userId }),
+      });
 
       if (!res.ok) {
         const text = await res.text();
