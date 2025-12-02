@@ -30,42 +30,19 @@ export const UserContextProvider = ({ children }: React.PropsWithChildren) => {
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Load token from localStorage on mount
+  // Load token and user from localStorage on mount
   useEffect(() => {
     const storedToken = localStorage.getItem("authToken");
-    if (storedToken) setToken(JSON.parse(storedToken));
-    else setLoading(false);
+    const storedUser = localStorage.getItem("user");
+
+    if (storedToken) {
+      setToken(storedToken);
+      if (storedUser) {
+        setUser(JSON.parse(storedUser));
+      }
+    }
+    setLoading(false);
   }, []);
-
-  // Fetch user when token changes
-  useEffect(() => {
-    const fetchUser = async () => {
-      if (!token) {
-        setLoading(false);
-        return;
-      }
-
-      try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/me`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        if (!res.ok) throw new Error("Invalid token");
-
-        const data = await res.json();
-        setUser(data.body);
-      } catch (err) {
-        console.error("Auth failed:", err);
-        localStorage.removeItem("authToken");
-        setToken(null);
-        setUser(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchUser();
-  }, [token]);
 
   return (
     <UserContext.Provider value={{ user, token, loading, setUser, setToken }}>

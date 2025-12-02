@@ -17,27 +17,59 @@ const SignUpPage = () => {
   const router = useRouter();
 
   const handleSignUp = async () => {
+    console.log("handleSignUp called");
     if (password !== password2) {
       toast.error("Passwords do not match");
       return;
     }
 
-    const response = await fetch(
-      "https://instagram-backend-gbgz.onrender.com/auth/signup",
-      {
-        headers: { "Content-Type": "application/json" },
-        method: "POST",
-        body: JSON.stringify({ credential, password, fullname, username }),
-      }
-    );
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      toast.error(errorData.message || "Sign up failed");
+    // Validate password requirements
+    if (password.length < 6) {
+      toast.error("Password must be at least 6 characters");
       return;
-    } else {
-      toast.success("Signed Up Successfully");
-      router.push("/signin");
+    }
+    if (!/(?=.*[a-z])/.test(password)) {
+      toast.error("Password must contain at least one lowercase letter");
+      return;
+    }
+    if (!/(?=.*[A-Z])/.test(password)) {
+      toast.error("Password must contain at least one uppercase letter");
+      return;
+    }
+    if (!/(?=.*\d)/.test(password)) {
+      toast.error("Password must contain at least one digit");
+      return;
+    }
+    if (!/(?=.*[@$!%*?&])/.test(password)) {
+      toast.error("Password must contain at least one special character");
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        "https://instagram-backend-gbgz.onrender.com/auth/signup",
+        {
+          headers: { "Content-Type": "application/json" },
+          method: "POST",
+          body: JSON.stringify({ credential, password, fullname, username }),
+        }
+      );
+
+      console.log("Signup fetch completed, status:", response.status);
+
+      const data = await response.json();
+      console.log("Signup response:", response.status, data);
+
+      if (!response.ok) {
+        toast.error(data.message || "Sign up failed");
+        return;
+      } else {
+        toast.success(data.message || "Signed Up Successfully");
+        router.push("/signin");
+      }
+    } catch (error) {
+      console.error("Signup fetch error:", error);
+      toast.error("Network error. Please try again.");
     }
   };
 

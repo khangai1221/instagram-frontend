@@ -25,6 +25,7 @@ const SignInPage = () => {
   const [loading, setLoading] = useState(false);
 
   const handleSignin = async () => {
+    console.log("handleSignin called");
     if (!credential || !password) {
       toast.error("Please fill in all fields");
       return;
@@ -33,13 +34,17 @@ const SignInPage = () => {
     setLoading(true);
 
     try {
+      console.log("Making signin request to:", `${API_URL}/auth/signin`);
       const res = await fetch(`${API_URL}/auth/signin`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ credential, password }),
       });
 
+      console.log("Signin fetch completed, status:", res.status);
+
       const data = await res.json();
+      console.log("Signin response:", res.status, data);
 
       if (!res.ok) {
         toast.error(data.message || "Invalid credentials");
@@ -48,19 +53,21 @@ const SignInPage = () => {
       }
 
       // Save JWT and user in localStorage
-      if (data.body.token) {
-        localStorage.setItem("token", data.body.token);
+      if (data.body && data.body.token) {
+        localStorage.setItem("authToken", data.body.token);
         localStorage.setItem("user", JSON.stringify(data.body));
       }
 
       // Update UserContext
-      setUser({
-        _id: data.body._id,
-        username: data.body.username,
-        fullname: data.body.fullname,
-        email: data.body.email,
-        phone: data.body.phone,
-      });
+      if (data.body) {
+        setUser({
+          _id: data.body._id,
+          username: data.body.username,
+          fullname: data.body.fullname,
+          email: data.body.email,
+          phone: data.body.phone,
+        });
+      }
 
       toast.success(data.message || "Signed in successfully");
 
